@@ -1,12 +1,9 @@
 #!/bin/bash
 
-while getopts ":e:a" opt; do
+while getopts ":e:" opt; do
   case ${opt} in
     e)
       ENVIRONMENT=$OPTARG
-      ;;
-    a)
-      ARGOCD_SERVER=$OPTARG
       ;;
   esac
 done
@@ -17,17 +14,12 @@ then
     exit 1
 fi
 
-if [[ -z ${ARGOCD_SERVER} ]]
-then
-    echo "-a <argocd server ip> not specified"
-fi
-
 #
 # create a ResourceRecordSet in the hosted zone in route 53 to point to argocd / default nginx-ingress
 #
 HOSTED_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name == 'raincove.io.'].Id" --output text)
 echo -e "hosted-zone-id resolved to ${HOSTED_ZONE_ID}"
-NGINX_PUBLIC_IP=$(kubectl get svc -n ingress-nginx -o jsonpath='{.items[].status.loadBalancer.ingress[].ip}')
+ARGOCD_SERVER=$(kubectl -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
 cat <<EOF > route53-request.json
   {
     "Comment": "CREATE/DELETE/UPSERT a record ",
@@ -35,21 +27,8 @@ cat <<EOF > route53-request.json
       {
         "Action": "UPSERT",
         "ResourceRecordSet": {
-          "Name": "${ENVIRONMENT}.raincove.io",
-          "Type": "A",
-          "TTL": 300,
-          "ResourceRecords": [
-            {
-              "Value": "${NGINX_PUBLIC_IP}"
-            }
-          ]
-        }
-      },
-      {
-        "Action": "UPSERT",
-        "ResourceRecordSet": {
           "Name": "argocd-${ENVIRONMENT}.raincove.io",
-          "Type": "A",
+          "Type": "CNAME",
           "TTL": 300,
           "ResourceRecords": [
             {

@@ -54,7 +54,7 @@ ARGOCD_PASSWORD=$(kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-se
 
 echo -e "Waiting for argocd-server to acquire an external IP address"
 while [ -z "$ARGOCD_SERVER" ]; do
-    ARGOCD_SERVER=$(kubectl -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[].ip}')
+    ARGOCD_SERVER=$(kubectl -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
     sleep 5
 done
 
@@ -69,11 +69,11 @@ echo -e "Finished installing argocd to the cluster, boostraping cluster"
 #
 # log into argocd, if the CLI is not found then install it
 #
-if [[ ! -f $HOME/.local/bin/argocd ]];
+if [[ ! -f /usr/local/bin/argocd ]];
 then
     wget -O argocd https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-amd64
     chmod +x argocd
-    mv argocd $HOME/.local/bin
+    sudo mv argocd /usr/local/bin
 fi
 
 #

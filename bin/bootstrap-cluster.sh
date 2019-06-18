@@ -54,12 +54,13 @@ eksctl create cluster \
   --name=${ENVIRONMENT}-raincove-io \
   --nodes=3 \
   --node-ami=auto \
+  --zones=${AWS_REGION}a,${AWS_REGION}b,${AWS_REGION}c \
   --region=${AWS_REGION}
 
 #
-# initialize TLS certificate as environment variables, k8s secrets
+# install TLS certificates into the cluster, these certificates and key have been pre-generated
 #
-${DIR}/initialize-secrets.sh
+${DIR}/install-secrets.sh
 
 #
 # assert that TLS_CERT and TLS_KEY are now populated
