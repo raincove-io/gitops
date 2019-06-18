@@ -1,10 +1,12 @@
 #!/bin/bash
 
-while getopts ":u:" opt; do
+while getopts ":u:e:" opt; do
   case ${opt} in
     u)
       GITOPS_REPO_URL=$OPTARG
       ;;
+    e)
+      ENVIRONMENT=$OPTARG
     \?) echo "Usage: -u <gitops url>"
       ;;
   esac
@@ -13,6 +15,12 @@ done
 if [[ -z ${GITOPS_REPO_URL} ]]
 then
     echo "-u <gitops url> not specified"
+    exit 1
+fi
+
+if [[ -z ${ENVIRONMENT} ]];
+then
+    echo "-e <environment> is not specified"
     exit 1
 fi
 
@@ -95,6 +103,7 @@ argocd app create applications \
     --dest-server https://kubernetes.default.svc \
     --repo ${GITOPS_REPO_URL} \
     --path applications \
-    --sync-policy automated
+    --sync-policy automated \
+    -p environment=${ENVIRONMENT}
 
 export ARGOCD_SERVER=${ARGOCD_SERVER}
