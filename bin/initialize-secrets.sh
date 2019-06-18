@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 SEALED_SECRET_VERSION=v0.7.0
 
 #
@@ -5,11 +6,11 @@ SEALED_SECRET_VERSION=v0.7.0
 #
 export TLS_KEY=$(aws secretsmanager get-secret-value \
 --secret-id raincove/io/tls-cert| jq --raw-output '.SecretString' | jq -r '.key')
-echo $TLS_KEY | base64 -d > key.pem
+echo ${TLS_KEY} | base64 -d > key.pem
 
 export TLS_CERT=$(aws secretsmanager get-secret-value \
 --secret-id raincove/io/tls-cert| jq --raw-output '.SecretString' | jq -r '.cert')
-echo $TLS_CERT | base64 -d > cert.pem
+echo ${TLS_CERT} | base64 -d > cert.pem
 
 CERT_NAME=nginx-tls
 kubectl create secret tls ${CERT_NAME} --key key.pem --cert cert.pem

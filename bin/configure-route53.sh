@@ -1,6 +1,26 @@
+#!/bin/bash
 
-ENVIRONMENT=$1
-ARGOCD_SERVER=$2
+while getopts ":e:a" opt; do
+  case ${opt} in
+    e)
+      ENVIRONMENT=$OPTARG
+      ;;
+    a)
+      ARGOCD_SERVER=$OPTARG
+      ;;
+  esac
+done
+
+if [[ -z ${ENVIRONMENT} ]]
+then
+    echo "-e <environment> not specified"
+    exit 1
+fi
+
+if [[ -z ${ARGOCD_SERVER} ]]
+then
+    echo "-a <argocd server ip> not specified"
+fi
 
 #
 # create a ResourceRecordSet in the hosted zone in route 53 to point to argocd / default nginx-ingress

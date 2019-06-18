@@ -1,6 +1,32 @@
-GITOPS_REPO_URL=$1
-TLS_CERT=$3
-TLS_KEY=$4
+#!/bin/bash
+
+while getopts ":u:" opt; do
+  case ${opt} in
+    u)
+      GITOPS_REPO_URL=$OPTARG
+      ;;
+    \?) echo "Usage: -u <gitops url>"
+      ;;
+  esac
+done
+
+if [[ -z ${GITOPS_REPO_URL} ]]
+then
+    echo "-u <gitops url> not specified"
+    exit 1
+fi
+
+if [[ -z ${TLS_CERT} ]]
+then
+    echo "TLS_CERT not defined, please run initialize-secrets.sh"
+    exit 1
+fi
+
+if [[ -z ${TLS_KEY} ]]
+then
+    echo "TLS_KEY not defined, please run initialize-secrets.sh"
+    exit 1
+fi
 
 ARGOCD_VERSION=v0.12.3
 #
@@ -35,7 +61,7 @@ echo -e "Finished installing argocd to the cluster, boostraping cluster"
 #
 # log into argocd, if the CLI is not found then install it
 #
-if [ ! -f $HOME/.local/bin/argocd ];
+if [[ ! -f $HOME/.local/bin/argocd ]];
 then
     wget -O argocd https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-amd64
     chmod +x argocd
@@ -70,3 +96,5 @@ argocd app create applications \
     --repo ${GITOPS_REPO_URL} \
     --path applications \
     --sync-policy automated
+
+export ARGOCD_SERVER=${ARGOCD_SERVER}

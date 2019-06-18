@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 mkdir -p ~/.kube
 
 echo -e "Installing kubectl"
