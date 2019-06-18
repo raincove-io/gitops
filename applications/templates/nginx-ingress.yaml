@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ngingx-ingress
+  name: nginx-ingress
   namespace: argocd
 spec:
   destination:
@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: ngingx-ingress/{{ .Values.environment }}
+    path: nginx-ingress/{{ .Values.environment }}
     repoURL: https://github.com/raincove-io/gitops.git
     targetRevision: HEAD
     directory:
