@@ -4,7 +4,6 @@ while getopts ":u:e:" opt; do
   case ${opt} in
     e)
       ENVIRONMENT=$OPTARG
-    \?) echo "Usage: -u <gitops url>"
       ;;
   esac
 done
