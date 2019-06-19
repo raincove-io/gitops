@@ -21,7 +21,7 @@ ARGOCD_SERVER=argocd-${ENVIRONMENT}.raincove.io
 HEALTH_CHECK_URL=https://${ARGOCD_SERVER}/api/version
 echo -e "Waiting for argocd server API to become responsive at ${HEALTH_CHECK_URL}"
 while [ -z "${ARGOCD_HEALTH}" ]; do
-    ARGOCD_HEALTH=$(curl -k ${HEALTH_CHECK_URL} | jq '.Version' -r)
+    ARGOCD_HEALTH=$(curl --silent -k ${HEALTH_CHECK_URL} | jq '.Version' -r)
     sleep 5
 done
 GITOPS_REPO_URL=https://github.com/raincove-io/gitops.git
