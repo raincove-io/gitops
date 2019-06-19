@@ -10,7 +10,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
-source ${DIR}/init-env.sh
+source $DIR/init-env.sh
+init_env
 
 #
 # install the TLS certificates as a tls secret in the cluster

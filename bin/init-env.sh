@@ -1,5 +1,7 @@
 #!/bin/bash
 
+init_env() {
+
 echo "Initializing environment variables"
 
 #
@@ -18,3 +20,5 @@ export TLS_CERT=$(aws secretsmanager get-secret-value --region ${AWS_REGION} \
 
 echo "ACCOUNT_ID=${ACCOUNT_ID}"
 echo "AWS_REGION=${AWS_REGION}"
+
+}

@@ -15,15 +15,15 @@ then
 fi
 
 #
-# we look for a service with a LoadBalancer type that is our ingress nginx
+# we look for a service with a LoadBalancer type that is our argocd server for GitOps
 #
-echo "Waiting for a hostname to appear for the service ingress-nginx"
-while [ -z "$NGINX_LB_ADDRESS" ]; do
-    NGINX_LB_ADDRESS=$(kubectl -n ingress-nginx get svc ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
+echo -e "Waiting for a hostname to appear for service argocd-server"
+ARGOCD_SERVER_ADDRESS=
+while [ -z "$ARGOCD_SERVER_ADDRESS" ]; do
+    ARGOCD_SERVER_ADDRESS=$(kubectl -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
     sleep 5
 done
-echo "Service ingress-nginx have ELB address ${NGINX_LB_ADDRESS}"
-
+echo "Service argocd-server have ELB address ${ARGOCD_SERVER_ADDRESS}"
 
 #
 # create a ResourceRecordSet in the hosted zone in route 53 to point to argocd / default nginx-ingress
@@ -37,12 +37,12 @@ cat <<EOF > route53-request.json
       {
         "Action": "UPSERT",
         "ResourceRecordSet": {
-          "Name": "${ENVIRONMENT}.raincove.io",
+          "Name": "argocd-${ENVIRONMENT}.raincove.io",
           "Type": "CNAME",
           "TTL": 300,
           "ResourceRecords": [
             {
-              "Value": "${NGINX_LB_ADDRESS}"
+              "Value": "${ARGOCD_SERVER_ADDRESS}"
             }
           ]
         }
