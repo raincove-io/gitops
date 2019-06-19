@@ -17,7 +17,12 @@ fi
 #
 # we look for a service with a LoadBalancer type that is our ingress nginx
 #
-NGINX_LB_ADDRESS=$(kubectl -n ingress-nginx get svc ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
+echo "Waiting for a hostname to appear for the service ingress-nginx"
+while [ -z "$NGINX_LB_ADDRESS" ]; do
+    NGINX_LB_ADDRESS=$(kubectl -n ingress-nginx get svc ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
+    sleep 5
+done
+echo "Service ingress-nginx have ELB address ${NGINX_LB_ADDRESS}"
 
 #
 # create a ResourceRecordSet in the hosted zone in route 53 to point to argocd / default nginx-ingress
