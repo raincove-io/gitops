@@ -1,23 +1,24 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
 SEALED_SECRET_VERSION=v0.7.0
 
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+
+source ${DIR}/init-env.sh
+
 #
-# install TLS certificate
+# install the TLS certificates as a tls secret in the cluster
 #
-export TLS_KEY=$(aws secretsmanager get-secret-value --region ${AWS_REGION} \
---secret-id raincove/io/tls-cert| jq --raw-output '.SecretString' | jq -r '.key')
 echo ${TLS_KEY} | base64 -d > key.pem
-
-export TLS_CERT=$(aws secretsmanager get-secret-value --region ${AWS_REGION} \
---secret-id raincove/io/tls-cert| jq --raw-output '.SecretString' | jq -r '.cert')
 echo ${TLS_CERT} | base64 -d > cert.pem
-
 CERT_NAME=nginx-tls
 kubectl create secret tls ${CERT_NAME} --key key.pem --cert cert.pem
-
-#
-# clean up the certificates from the local FS
-#
 rm key.pem cert.pem
 
 #

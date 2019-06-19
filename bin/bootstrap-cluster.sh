@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -8,25 +8,18 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
+$DIR/init-env.sh
+
 #
 # read CLI command options
 #
 while getopts ":u:e:" opt; do
   case ${opt} in
-    u)
-      GITOPS_REPO_URL=$OPTARG
-      ;;
     e)
       ENVIRONMENT=$OPTARG
       ;;
   esac
 done
-
-if [[ -z ${GITOPS_REPO_URL} ]]
-then
-    echo "-u <gitops url> not specified"
-    exit 1
-fi
 
 if [[ -z ${ENVIRONMENT} ]]
 then
@@ -40,15 +33,10 @@ fi
 ${DIR}/validate-env.sh
 ${DIR}/install-tools.sh
 
-export ACCOUNT_ID=$(aws sts get-caller-identity --output text --query Account)
-#
-# always install EKS cluster in the region we are currently runnning in to prevent ambiguities
-#
-export AWS_REGION=$(curl -s 169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
-
 #
 # run the EKS bootstrap via eksctl, this creates 2 stacks: nodegroup and control plane stacks and writes kubeconfig into the 
-# host running the bootstrap process
+# host running the bootstrap process. This initial EKS cluster uses a default nodegroup of a modest size, using m5.large instance worker nodes
+# subsequent upgrades and nodegroup configurations can be changed via the AWS ASG APIs
 #
 eksctl create cluster \
   --name=${ENVIRONMENT}-raincove-io \
@@ -63,33 +51,16 @@ eksctl create cluster \
 ${DIR}/install-secrets.sh
 
 #
-# assert that TLS_CERT and TLS_KEY are now populated
-# these are going to attached to argocd's HTTPS server and the ingress controller server
-#
-if [[ -z ${TLS_CERT} ]];
-then
-  echo "TLS_CERT environment was not properly initialized"
-  exit 1
-fi
-
-if [[ -z ${TLS_KEY} ]];
-then
-  echo "TLS_KEY environment was not properly initialized"
-  exit 1
-fi
-
-#
 # install argocd so we can begin to run gitops
 #
-${DIR}/install-argocd.sh -u ${GITOPS_REPO_URL}
-
-if [[ -z ${ARGOCD_SERVER} ]]
-then
-    echo "cannot find environment variable ARGOCD_SERVER, please run install-argocd.sh"
-    exit 1
-fi
+${DIR}/install-argocd.sh
 
 #
 # configure DNS records to the new cluster
 #
-${DIR}/configure-route53.sh -e ${ENVIRONMENT} -a ${ARGOCD_SERVER}
+${DIR}/configure-route53.sh -e ${ENVIRONMENT}
+
+#
+# after the routes for argocd has been configured TLS handshakes should succeed at the public domain name argocd-<environment>.raincove.io
+#
+${DIR}/init-argocd.sh -e ${ENVIRONMENT}

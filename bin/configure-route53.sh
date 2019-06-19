@@ -25,11 +25,21 @@ done
 echo "Service ingress-nginx have ELB address ${NGINX_LB_ADDRESS}"
 
 #
+# we look for a service with a LoadBalancer type that is our argocd server for GitOps
+#
+echo -e "Waiting for a hostname to appear for service argocd-server"
+ARGOCD_SERVER_ADDRESS=
+while [ -z "$ARGOCD_SERVER_ADDRESS" ]; do
+    ARGOCD_SERVER_ADDRESS=$(kubectl -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
+    sleep 5
+done
+echo "Service argocd-server have ELB address ${ARGOCD_SERVER_ADDRESS}"
+
+#
 # create a ResourceRecordSet in the hosted zone in route 53 to point to argocd / default nginx-ingress
 #
 HOSTED_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name == 'raincove.io.'].Id" --output text)
 echo -e "hosted-zone-id resolved to ${HOSTED_ZONE_ID}"
-ARGOCD_SERVER=$(kubectl -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
 cat <<EOF > route53-request.json
   {
     "Comment": "CREATE/DELETE/UPSERT a record ",
@@ -55,7 +65,7 @@ cat <<EOF > route53-request.json
           "TTL": 300,
           "ResourceRecords": [
             {
-              "Value": "${ARGOCD_SERVER}"
+              "Value": "${ARGOCD_SERVER_ADDRESS}"
             }
           ]
         }
@@ -63,7 +73,7 @@ cat <<EOF > route53-request.json
     ]
   }
 EOF
-echo -e "Adding A records for hosted-zone-id=${HOSTED_ZONE_ID} ..."
+echo -e "Adding CNAME records for hosted-zone-id=${HOSTED_ZONE_ID} ..."
 aws route53 change-resource-record-sets \
     --hosted-zone-id ${HOSTED_ZONE_ID} \
     --change-batch file://route53-request.json

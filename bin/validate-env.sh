@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #
 # check the script is running using the proper IAM role
 # 
