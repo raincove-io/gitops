@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: authz/{{ Values.environment }}
+    path: authz/{{ .Values.environment }}
     repoURL: https://github.com/raincove-io/gitops.git
     targetRevision: HEAD
     directory:
