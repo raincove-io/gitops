@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  url: https://{{ .Values.environment }}.raincove.io
+kind: ConfigMap
+metadata:
+  name: site
+  namespace: default

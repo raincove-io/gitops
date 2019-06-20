@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+ name: mongo-authz
+ labels:
+   name: mongo-authz
+spec:
+ ports:
+ - port: 27017
+   targetPort: 27017
+ clusterIP: None
+ selector:
+   role: mongo-authz
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+   name: mongo-authz
+spec:
+  serviceName: mongo-authz
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        role: mongo-authz
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: mongo
+          command:
+              - mongod
+              - "--replSet"
+              - rs0
+              - "--bind_ip"
+              - 0.0.0.0
+              - "--smallfiles"
+              - "--noprealloc"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-authz-persistent-storage
+              mountPath: /data/db
+        - name: mongo-sidecar
+          image: cvallance/mongo-k8s-sidecar
+          env:
+            - name: MONGO_SIDECAR_POD_LABELS
+              value: "role=mongo-authz"
+            - name: KUBERNETES_MONGO_SERVICE_NAME
+              value: mongo-authz
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-authz-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "standard"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
