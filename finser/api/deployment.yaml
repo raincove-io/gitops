@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: finser
+  name: finser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: finser
+  template:
+    metadata:
+      labels:
+        app: finser
+      name: finser
+    spec:
+      containers:
+      - image: erfangc/finser:latest
+        imagePullPolicy: IfNotPresent
+        name: finser
+        env:
+          - name: CONTACT_POINTS
+            value: cassandra-0.cassandra.default.svc.cluster.local
+      restartPolicy: Always

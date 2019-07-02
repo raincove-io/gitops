@@ -1,0 +1,16 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: yahoo-finance-parser
+spec:
+  schedule: "0 */12 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: hello
+              image: erfangc/yahoo-finance-parser:latest
+              # TODO add the clientId and clientSecret
+              # TODO make sure the SDK is pointing to the correct end point
+          restartPolicy: OnFailure
