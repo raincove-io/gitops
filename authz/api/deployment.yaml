@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - image: erfangc/authz:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         name: authz
         env:
         - name: URL
