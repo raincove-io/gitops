@@ -40,6 +40,7 @@ kubectl apply \
 MASTER_CRT=$(aws secretsmanager get-secret-value --region ${AWS_REGION} --secret-id raincove/io/sealed-secrets-crt --query SecretString --output text)
 MASTER_KEY=$(aws secretsmanager get-secret-value --region ${AWS_REGION} --secret-id raincove/io/sealed-secrets-key --query SecretString --output text)
 
+sleep 10;
 if [[ -z "${MASTER_KEY}" || -z "${MASTER_CRT}" ]]
 then
   echo "Cannot find a master key from secretsmanager, using the generated key instead, if the GitOps repository have encrypted secrets, they must all be re-encrypted!!"
@@ -73,7 +74,7 @@ metadata:
 type: kubernetes.io/tls
 EOF
   echo "Deleting pods of sealed-secrets-controller, k8s will restart them to pick up the new master key"
-  kubectl delete pod -l name=sealed-secrets-controller
+  kubectl delete -n kube-system pod -l name=sealed-secrets-controller
 fi
 
 echo -e "Finished installing SealedSecret ${SEALED_SECRET_VERSION} to the cluster"
