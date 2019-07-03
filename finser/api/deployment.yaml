@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - image: erfangc/finser:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         name: finser
         env:
           - name: CONTACT_POINTS
