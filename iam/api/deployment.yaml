@@ -38,7 +38,7 @@ spec:
                   name: site
                   key: url
             - name: REDIS_HOST
-              value: iam-redis-0
+              value: iam-redis
             - name: ISSUER
               value: https://raincove.auth0.com/
             - name: CALLBACK
