@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: yahoo-finance-parser
+  name: yahoo-finance-parser-nyse
 spec:
   schedule: "0 */12 * * *"
   jobTemplate:
@@ -11,7 +11,38 @@ spec:
           containers:
             - name: hello
               image: erfangc/yahoo-finance-parser:latest
-              # TODO make sure the SDK is pointing to the correct end point
+              command:
+                - run-universe
+                - NYSE
+              env:
+                - name: CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: yahoo-finance-parser-secret
+                      key: clientId
+                - name: CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: yahoo-finance-parser-secret
+                      key: clientSecret
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: yahoo-finance-parser-nasdaq
+spec:
+  schedule: "0 */12 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: hello
+              image: erfangc/yahoo-finance-parser:latest
+              command:
+                - run-universe
+                - NASDAQ
               env:
                 - name: CLIENT_ID
                   valueFrom:
