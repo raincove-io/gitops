@@ -68,3 +68,8 @@ ${DIR}/init-argocd.sh -e ${ENVIRONMENT}
 # the final step is to give the ingress controller a CNAME record in route 53
 #
 ${DIR}/configure-route53.sh -e ${ENVIRONMENT}
+
+#
+# install flutend and populate logs into CloudWatch
+#
+${DIR}/install-flutend.sh -e ${ENVIRONMENT}
