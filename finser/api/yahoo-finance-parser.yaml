@@ -11,6 +11,7 @@ spec:
           containers:
             - name: hello
               image: erfangc/yahoo-finance-parser:latest
+              imagePullPolicy: Always
               args:
                 - run-universe
                 - NYSE
@@ -40,6 +41,7 @@ spec:
           containers:
             - name: hello
               image: erfangc/yahoo-finance-parser:latest
+              imagePullPolicy: Always
               args:
                 - run-universe
                 - NASDAQ
