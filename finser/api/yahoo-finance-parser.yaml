@@ -12,6 +12,7 @@ spec:
             - name: hello
               image: erfangc/yahoo-finance-parser:latest
               command:
+                - yahoo-finance-parser
                 - run-universe
                 - NYSE
               env:
@@ -41,6 +42,7 @@ spec:
             - name: hello
               image: erfangc/yahoo-finance-parser:latest
               command:
+                - yahoo-finance-parser
                 - run-universe
                 - NASDAQ
               env:
