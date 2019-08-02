@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: home
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/auth-url: "https://$host/iam/api/v1/_authorize"
+    nginx.ingress.kubernetes.io/auth-signin: "https://$host/iam/api/v1/login?originalRequestUri=$escaped_request_uri"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /home
+            backend:
+              serviceName: home
+              servicePort: 5000
+---
