@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: iam
+  name: iam
+spec:
+  selector:
+    matchLabels:
+      app: iam
+  template:
+    metadata:
+      labels:
+        app: iam
+      name: iam
+    spec:
+      containers:
+        - image: erfangc/iam:latest
+          imagePullPolicy: Always
+          name: iam
+          ports:
+            - containerPort: 8080
+              name: spring-boot
+          env:
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: iam-secret
+                  key: clientSecret
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: clientId
+                  name: iam-secret
+            - name: URL
+              valueFrom:
+                configMapKeyRef:
+                  name: site
+                  key: url
+            - name: REDIS_HOST
+              value: iam-redis
+            - name: ISSUER
+              value: https://raincove.auth0.com/
+            - name: CALLBACK
+              value: $(URL)/iam/api/v1/callback
+            - name: AUDIENCE
+              value: https://api.raincove.io
+            - name: ROOT_USERS
+              value: google-oauth2|106338408503128597290
+      restartPolicy: Always
