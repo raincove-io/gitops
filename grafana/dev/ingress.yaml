@@ -4,8 +4,6 @@ metadata:
   name: grafana
   annotations:
     kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/auth-url: "https://$host/iam/api/v1/_authorize"
-    nginx.ingress.kubernetes.io/auth-signin: "https://$host/iam/api/v1/login?originalRequestUri=$escaped_request_uri"
   namespace: monitoring
 spec:
   rules:
